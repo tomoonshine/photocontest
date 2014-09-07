@@ -1,29 +1,23 @@
 <?php
     class vote_custom extends def_module {
 		
-		function setRating_mod($elem='0') {
+		function setRating_mod($page_id="0", $elem='0') {
 			
+			if($page_id == '0') return;
 			if($elem == '0') return;
 			$ip=$_SERVER['REMOTE_ADDR'];
-			$locking = 3600;
+			
+			$page = umiHierarchy::getInstance()->getElement($page_id);
+			// Если каталог фотоконкурса не являеться фотоконкурсом то выход
+			if($page->getObjectTypeId() != 147) return;
+			
+			$locking = $page->getValue('blokirovka_polzovatelya_v_sekundah');
+			
 	
-			// $this->setElementRating('0','1873');
-			// echo $elem;
-			// return;
-			// echo "<b>IP Address = $ip</b><br/>";
-			
-			// // Получение указателя на справочник Голосовавшие
-			// $typesCollection = umiObjectTypesCollection::getInstance();
-			// $voted = $typesCollection->getType('146');
-			// echo "справочник ".$voted->getName()."<br/>";
-			// echo "oK<br/>";
-			
 			$objectsCollection = umiObjectsCollection::getInstance();
 			$Voters = $objectsCollection->getGuidedItems('146');
 			
-			// var_dump($Voters);
-			
-			
+				
 			// Проверка на совпадение ip адресса
 			$VoteObj = NULL;
 			foreach ($Voters as  $vote)
@@ -41,6 +35,7 @@
 					//
 					$VoteObj->setValue('vremya_golosovaniya', time());
 					$this->setElementRating('0',$elem);
+					return;
 				}
 				
 			}
@@ -54,7 +49,7 @@
 			$objectsCollection->getObject($vote)->setValue('vremya_golosovaniya',time());
 			
 			$this->setElementRating('0', $elem);
-		
+			return;
 		}
 
     };
