@@ -1,6 +1,14 @@
 <?php
     class vote_custom extends def_module {
 		
+		
+		// Функция добавляет 1 балл в рейтинг страницы и записывает ip адресс 
+		// пользователя в справочник "Голосовавшие" который в данной версии имеет номер 146
+		// Также проверяется каталог в катором лежит страница в данной версии 147 это тип страницы
+		// в которой должно быть поле блокировка на время "blokirovka_polzovatelya_v_sekundah"
+		// При следующей попытке проголосовать ip адресс голосующего сравнивается с адресами в базе 
+		// если есть то возможность учесть голос будет зависеть от времени на которое блокируються голосующие
+		// #page_id - каталог голосования $elem - рейтинговая страница в каталоге
 		function setRating_mod($page_id="0", $elem='0') {
 			
 			if($page_id == '0') return;
@@ -45,10 +53,20 @@
 			$vote = $objectsCollection->addObject($ip, '146');
 			$objectsCollection->getObject($vote)->setValue('ip_adress',$ip);
 			$objectsCollection->getObject($vote)->setValue('data_golosovaniya',date('d.m.Y H:i'));
-			$objectsCollection->getObject($vote)->setValue('stranica','0123');
+			$objectsCollection->getObject($vote)->setValue('stranica',$elem);
 			$objectsCollection->getObject($vote)->setValue('vremya_golosovaniya',time());
 			
 			$this->setElementRating('0', $elem);
+			return;
+		}
+		
+		// Функция удаляет количество баллов $bal со страницы $elem
+		// Доступна только администратору у которого есть право удалять опросы
+		function deleteRating_mod($elem,$bal){
+			//rate_sum
+			$page = umiHierarchy::getInstance()->getElement($elem);
+			$page->setValue('rate_sum',$page->getValue('rate_sum')-$bal);
+			echo "Ok";
 			return;
 		}
 
